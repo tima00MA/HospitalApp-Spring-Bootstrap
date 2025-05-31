@@ -1,5 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="template">
+
 <head>
     <meta charset="UTF-8">
     <title>Patients</title>
@@ -7,9 +11,10 @@
     <link rel="stylesheet" href="/webjars/bootstrap-icons/1.13.1/font/bootstrap-icons.css">
 </head>
 <body>
-<div class="p-3 m-2">
+<div layout:fragment="content1">
+<div class="container mt-2">
     <div class="card">
-    <div class="card-header">List Patients</div>
+    <div class="card-header">Liste des Patients</div>
     <div class="card-body">
         <form method ="get" th:action="@{index}">
             <label>Keyword:</label>
@@ -33,8 +38,13 @@
                 <td th:text="${p.score}"></td>
                 <td th:text="${p.malade}"></td>
                 <td>
+                    <a th:href="@{editPatient(id=${p.id},keyword=${keyword},page=${currentPage})}" class ="btn btn-success">
+                        Edit
+                    </a>
+                </td>
+                <td>
                     <a onclick="javascript:return confirm('Est vous sure?')"
-                       th:href="@{deletePatient(id=${p.id},keyword=${keyword},page=${currentPage})}" class ="btn btn-danger"> <i class="bi bi-trash3-fill"></i></a>
+                       class ="btn btn-danger" th:href="@{deletePatient(id=${p.id},keyword=${keyword},page=${currentPage})}" > <i class="bi bi-trash3-fill"></i></a>
                 </td>
             </tr>
             </tbody>
@@ -51,6 +61,8 @@
 
 
 </div>
-
+</div>
 </body>
 </html>
+
+
