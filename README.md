@@ -435,11 +435,9 @@ public class PatientController {
 
 *Capture représentant l’interface principale avec tous les patients affichés dans une table.*
 
-```markdown
 ### Liste des patients
 
 ![Base de données](img/img_5.png)
-```
 
 ---
 
@@ -447,11 +445,10 @@ public class PatientController {
 
 *Capture représentant le formulaire vide avec les champs à remplir.*
 
-```markdown
 ### Formulaire d’ajout d’un patient
 
 ![Ajout Patient](img/img_3.png)
-```
+
 
 ---
 
@@ -459,8 +456,8 @@ public class PatientController {
 
 *Capture montrant le même formulaire, mais cette fois pré-rempli pour modifier un patient existant.*
 
-```markdown
 ### Formulaire de modification d’un patient
 
 ![Modification Patient](img/img_4.png)
-```
+
+
