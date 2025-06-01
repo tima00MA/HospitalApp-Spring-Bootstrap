@@ -238,7 +238,7 @@ Formulaire simple permettant de chercher les patients par nom, avec un champ tex
   <button type="submit">Rechercher</button>
 </form>
 ```
-![List des patient](chemin/vers/img_1.png)
+![List des patient](imgg_1.png)
 
 ---
 
