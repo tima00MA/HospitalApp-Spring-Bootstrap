@@ -461,3 +461,239 @@ public class PatientController {
 ![Modification Patient](img/img_4.png)
 
 
+
+---
+
+# Partie 3 : Sécurité et Authentification avec Spring Security
+
+---
+
+## Introduction
+
+Dans cette partie, je configure la sécurité de mon application hospitalière avec Spring Security.  
+Je gère l’authentification des utilisateurs, la gestion des rôles (admin et user), ainsi que la restriction d’accès aux différentes ressources selon les droits.
+
+---
+
+## 1. Configuration principale de Spring Security
+
+Je définis la configuration de sécurité dans la classe `SecurityConfig`.  
+Elle précise les règles d’accès, la page de login personnalisée, la gestion des erreurs, et le service utilisateur.
+
+Extrait clé (configuration des accès et login) :
+
+```java
+@Bean
+public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
+    httpSecurity
+        .authorizeHttpRequests(auth -> auth
+            .requestMatchers("/webjars/**").permitAll()
+            .anyRequest().authenticated()
+        )
+        .formLogin(form -> form
+            .loginPage("/login")
+            .defaultSuccessUrl("/", true)
+            .permitAll()
+        )
+        .exceptionHandling(ex -> ex
+            .accessDeniedPage("/notAuthorized")
+        )
+        .userDetailsService(userDetailsServiceImpl);
+
+    return httpSecurity.build();
+}
+````
+
+**Description :**
+
+* Les ressources statiques sous `/webjars/**` sont accessibles sans authentification.
+* Toutes les autres requêtes nécessitent une authentification.
+* La page de connexion personnalisée est `/login`.
+* En cas de refus d’accès, la page `/notAuthorized` est affichée.
+* Le service `userDetailsServiceImpl` est utilisé pour charger les données utilisateur depuis la base.
+
+---
+
+### SecurityConfig.java
+
+![Security Config](img/img_6.png)
+---
+
+## 2. Page de connexion (Login)
+
+Je crée une page simple de login avec Thymeleaf, qui contient un formulaire POST vers `/login` avec deux champs : `username` et `password`.
+
+Extrait :
+
+```html
+<form method="post" th:action="@{/login}">
+    <div class="mb-3">
+        <label class="form-label">Username</label>
+        <input type="text" name="username" class="form-control">
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Password</label>
+        <input type="password" name="password" class="form-control">
+    </div>
+    <button class="btn btn-primary">Login</button>
+</form>
+```
+
+**Description :**
+Cette page est la porte d’entrée de l’utilisateur pour accéder à l’application.
+Si les informations sont correctes, l’utilisateur est redirigé vers la page d’accueil.
+
+---
+
+### Login Page
+
+![Login Page](img/img_7.png)
+
+---
+
+## 3. Gestion des accès interdits
+
+Si un utilisateur tente d’accéder à une page pour laquelle il n’a pas les droits, il est redirigé vers une page qui lui affiche un message clair d’interdiction.
+
+Extrait :
+
+```html
+<div class="alert alert-danger m-3">
+    <h2>You are not authorized to view this page.</h2>
+</div>
+```
+
+**Description :**
+Cela améliore l’expérience utilisateur en l’informant que l’accès est refusé plutôt que de bloquer silencieusement.
+
+---
+### Interface utilisateur sans autorisation d'administration
+Pour les utilisateurs classiques (ROLE_USER), l’interface web est en lecture seule.
+Ils peuvent :
+
+Consulter les informations disponibles (patients, rendez-vous, médecins, etc.)
+
+Accéder à leur profil et se déconnecter
+
+Mais ils ne peuvent ni ajouter, ni modifier, ni supprimer des données sensibles.
+Toutes les actions critiques sont désactivées dans l’interface ou bien protégées côté serveur par des règles de sécurité.
+
+
+![No tAuthorizedPage](img/img_8.png)
+
+---
+
+## 4. Modèle des tables dans la base de données
+
+Pour gérer les utilisateurs et leurs rôles, j’ai créé deux tables dans ma base relationnelle.
+
+Schéma important :
+
+```sql
+CREATE TABLE IF NOT EXISTS users (
+    username VARCHAR(50) PRIMARY KEY,
+    password VARCHAR(500) NOT NULL,
+    enabled BOOLEAN NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS authorities (
+    username VARCHAR(50),
+    authority VARCHAR(50),
+    CONSTRAINT fk_authorities_users FOREIGN KEY(username) REFERENCES users(username)
+);
+```
+
+**Description :**
+
+* La table `users` contient les identifiants, mots de passe (cryptés) et statut d’activation.
+* La table `authorities` associe à chaque utilisateur un ou plusieurs rôles (ex : ROLE\_ADMIN, ROLE\_USER).
+
+---
+
+### BaseDeDonnées / TableUsers
+
+![No tAuthorizedPage](img/img_9.png)
+
+###  BaseDeDonnées / TableAuthorities
+
+![No tAuthorizedPage](img/img_10.png)
+
+---
+
+## 5. Entités JPA pour la gestion des utilisateurs et rôles
+
+Voici comment je modélise les utilisateurs et rôles en Java avec JPA.
+
+Extraits :
+
+```java
+@Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class AppUser {
+    @Id
+    private String userId;
+
+    @Column(unique = true)
+    private String username;
+
+    private String password;
+    private String email;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    private List<AppRole> roles;
+}
+```
+
+```java
+@Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class AppRole {
+    @Id
+    private String role;
+}
+```
+Gestion du logout
+J’ai également configuré la déconnexion des utilisateurs. Lorsqu’un utilisateur clique sur le bouton “Logout”, sa session est invalidée et il est redirigé vers la page de connexion.
+
+Extrait Thymeleaf (dans la navbar par exemple) :
+
+```html
+<form th:action="@{/logout}" method="post">
+    <button class="btn btn-outline-danger">Logout</button>
+</form>
+```
+![No tAuthorizedPage](img/img_11.png)
+
+
+**Description :**
+
+* La classe `AppUser` contient les données principales et la liste des rôles associés.
+* La classe `AppRole` représente un rôle de sécurité.
+* La relation est `ManyToMany` pour permettre à un utilisateur d’avoir plusieurs rôles.
+
+# Conclusion générale
+À travers ce projet, j’ai conçu une application web complète de gestion hospitalière avec :
+
+Une structure MVC claire (Spring Boot, JPA, Thymeleaf)
+
+Une base de données bien organisée avec relations entre entités
+
+Une interface intuitive pour les administrateurs et utilisateurs
+
+Une sécurité solide grâce à Spring Security, avec :
+
+Authentification
+
+Autorisation selon les rôles
+
+Pages de login, accès refusé, et logout
+
+Protection des ressources selon les droits
+
+Ce projet m’a permis de mieux comprendre l’architecture d’une application web sécurisée et bien structurée, en intégrant plusieurs modules du framework Spring.
