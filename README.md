@@ -671,29 +671,23 @@ Extrait Thymeleaf (dans la navbar par exemple) :
 ![No tAuthorizedPage](img/img_11.png)
 
 
-**Description :**
-
-* La classe `AppUser` contient les données principales et la liste des rôles associés.
-* La classe `AppRole` représente un rôle de sécurité.
-* La relation est `ManyToMany` pour permettre à un utilisateur d’avoir plusieurs rôles.
-
 # Conclusion générale
 À travers ce projet, j’ai conçu une application web complète de gestion hospitalière avec :
 
-Une structure MVC claire (Spring Boot, JPA, Thymeleaf)
+* Une structure MVC claire (Spring Boot, JPA, Thymeleaf)
 
-Une base de données bien organisée avec relations entre entités
+* Une base de données bien organisée avec relations entre entités
 
-Une interface intuitive pour les administrateurs et utilisateurs
+* Une interface intuitive pour les administrateurs et utilisateurs
 
-Une sécurité solide grâce à Spring Security, avec :
+* Une sécurité solide grâce à Spring Security, avec :
 
-Authentification
+  * Authentification
 
-Autorisation selon les rôles
+  * Autorisation selon les rôles
 
-Pages de login, accès refusé, et logout
+  * Pages de login, accès refusé, et logout
 
-Protection des ressources selon les droits
+  * Protection des ressources selon les droits_
 
 Ce projet m’a permis de mieux comprendre l’architecture d’une application web sécurisée et bien structurée, en intégrant plusieurs modules du framework Spring.
