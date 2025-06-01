@@ -274,4 +274,193 @@ Page web pour afficher la liste paginée des patients.
 * Utilisation de Bootstrap.
 * Pagination avec boutons numérotés.
 ---
+Voici ton fichier `README.md` **sans émojis** et avec les **emplacements exacts** où tu peux insérer les **captures d’écran** pour :
 
+* la base de données,
+* l’ajout d’un patient,
+* la modification d’un patient.
+
+---
+
+## Partie 2 : Formulaire d’ajout et d’édition des patients (avec sécurité et Bootstrap)
+
+---
+
+### Objectif :
+
+Permettre à l’utilisateur (admin ou médecin par exemple) d’**ajouter** ou **modifier** les informations d’un patient via un **formulaire sécurisé**, avec une **interface claire** et un **design responsive** basé sur **Bootstrap**.
+
+---
+
+### Fonctionnalités :
+
+| Fonction         | Détail                                                             |
+| ---------------- | ------------------------------------------------------------------ |
+| Ajouter patient  | Formulaire pour saisir les infos d’un nouveau patient              |
+| Modifier patient | Formulaire pré-rempli pour éditer les infos d’un patient           |
+| Sécurité         | Champs obligatoires, validation des données avec feedback d’erreur |
+| Interface        | Utilisation de Bootstrap 5 pour une interface propre               |
+| Navigation       | NavBar intégrée pour naviguer entre les pages                      |
+
+---
+
+### Structure du fichier HTML (Thymeleaf + Bootstrap)
+
+```html
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="template">
+```
+
+Ce bloc signifie que ce fichier **utilise un template principal** (`template.html`) avec Thymeleaf.
+
+---
+
+### La NavBar (dans le template `template.html`)
+
+```html
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">PatientApp</a>
+    <div class="collapse navbar-collapse">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item"><a class="nav-link" href="/">Accueil</a></li>
+        <li class="nav-item"><a class="nav-link" href="/patients">Patients</a></li>
+        <li class="nav-item"><a class="nav-link" href="/formPatient">Ajouter</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+```
+
+Cette barre permet une **navigation fluide** entre les sections principales de l’appli.
+
+---
+
+### Le formulaire d'ajout / édition (`formPatients.html`)
+
+> Ce formulaire est **réutilisé** à la fois pour créer un patient **ou** pour **éditer** un existant (avec `th:value` pour pré-remplir les champs).
+
+```html
+<form method="post" th:action="@{save}">
+```
+
+`th:action="@{save}"` : envoie les données à la méthode `@PostMapping("/save")` du contrôleur Spring.
+
+---
+
+### Champs du formulaire avec validation :
+
+```html
+<label for="nom">Name</label>
+<input id="nom" class="form-control" name="nom" th:value="${patient.nom}" required>
+<span class="text-danger" th:errors="${patient.nom}"></span>
+```
+
+Chaque champ est :
+
+* Obligatoire (`required`)
+* Lié à l'objet `patient`
+* Affiche les erreurs de validation si elles existent (`th:errors`)
+
+Les autres champs sont construits de la même manière :
+
+* Prénom (`prenom`)
+* Date de naissance (`dateNaissance`)
+* Malade (`malade`) => booléen
+* Score (`score`) => entier
+
+---
+
+### Sécurité & Contraintes
+
+Les contraintes de validation sont définies dans la classe **Patient.java**, exemple :
+
+```java
+@Entity
+public class Patient {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @NotEmpty(message = "Le nom est obligatoire")
+    private String nom;
+
+    @NotEmpty(message = "Le prénom est obligatoire")
+    private String prenom;
+
+    @Past
+    private Date dateNaissance;
+
+    private boolean malade;
+
+    @Min(0) @Max(100)
+    private int score;
+}
+```
+
+Grâce à `javax.validation`, ces contraintes sont **automatiquement vérifiées** et affichées dans le formulaire via `th:errors`.
+
+---
+
+### Contrôleur (Spring MVC)
+
+```java
+@Controller
+public class PatientController {
+    @PostMapping("/save")
+    public String savePatient(@Valid Patient patient, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            return "formPatients";
+        }
+        patientRepository.save(patient);
+        return "redirect:/patients";
+    }
+
+    @GetMapping("/editPatient")
+    public String editPatient(@RequestParam Long id, Model model) {
+        Patient patient = patientRepository.findById(id).orElse(null);
+        model.addAttribute("patient", patient);
+        return "formPatients";
+    }
+}
+```
+
+---
+
+### Captures d’écran à insérer
+
+#### 1. **Base de données (patients listés dans une table)**
+
+*Capture représentant l’interface principale avec tous les patients affichés dans une table.*
+
+```markdown
+### Liste des patients
+
+![Base de données](img/img_5.png)
+```
+
+---
+
+#### 2. **Formulaire d’ajout d’un patient**
+
+*Capture représentant le formulaire vide avec les champs à remplir.*
+
+```markdown
+### Formulaire d’ajout d’un patient
+
+![Ajout Patient](img/img_3.png)
+```
+
+---
+
+#### 3. **Formulaire de modification d’un patient**
+
+*Capture montrant le même formulaire, mais cette fois pré-rempli pour modifier un patient existant.*
+
+```markdown
+### Formulaire de modification d’un patient
+
+![Modification Patient](img/img_4.png)
+```

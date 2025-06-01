@@ -19,7 +19,9 @@ public class Patient {
     private Long id;
     @NotEmpty
     @Size(min = 4, max = 50)
+    @NotEmpty(message = "Le nom est obligatoire")
     private String nom;
+    @NotEmpty(message = "Le prénom est obligatoire")
     private String prenom;
     @Temporal(TemporalType.DATE)
     @DateTimeFormat(pattern = "yyyy-mm-dd")
