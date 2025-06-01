@@ -220,7 +220,7 @@ Affiche la liste paginée des patients avec leurs informations principales (id, 
 </table>
 ```
 
-![Recherche](img/img.png)
+![Recherche](img/img_1.png)
 
 
 ---
@@ -238,7 +238,7 @@ Formulaire simple permettant de chercher les patients par nom, avec un champ tex
   <button type="submit">Rechercher</button>
 </form>
 ```
-![List des patient](img/img_1.png)
+![List des patient](img/img.png)
 
 ---
 
